@@ -1,0 +1,53 @@
+%{
+#include <stdio.h>
+int line_num = 1;
+int comment_level = 0;
+%}
+
+%%
+
+input      { if (comment_level == 0) printf("%d_tINPUT\n", line_num); }
+output     { if (comment_level == 0) printf("%d_tOUTPUT\n", line_num); }
+node       { if (comment_level == 0) printf("%d_tNODE\n", line_num); }
+evaluate   { if (comment_level == 0) printf("%d_tEVALUATE\n", line_num); }
+
+and        { if (comment_level == 0) printf("%d_tAND\n", line_num); }
+or         { if (comment_level == 0) printf("%d_tOR\n", line_num); }
+xor        { if (comment_level == 0) printf("%d_tXOR\n", line_num); }
+not        { if (comment_level == 0) printf("%d_tNOT\n", line_num); }
+
+true       { if (comment_level == 0) printf("%d_tTRUE\n", line_num); }
+false      { if (comment_level == 0) printf("%d_tFALSE\n", line_num); }
+
+[a-zA-Z][a-zA-Z0-9_]* { if (comment_level == 0) 
+printf("%d_tIDENTIFIER_(%s)\n", line_num, yytext); }
+
+\(\s*       { if (comment_level == 0) printf("%d_tLPR\n", line_num); }
+\)\s*       { if (comment_level == 0) printf("%d_tRPR\n", line_num); }
+=\s*        { if (comment_level == 0) printf("%d_tASSIGN\n", line_num); }
+,\s*        { if (comment_level == 0) printf("%d_tCOMMA\n", line_num); }
+
+"/*"        { comment_level++; }
+"*/"        { if (comment_level > 0) comment_level--; else 
+printf("%d_ILLEGAL_CHARACTER_(*/)\n", line_num); }
+
+\/\/[^\n]*  { }
+
+\n          { line_num++; }
+
+[ \t]+      { }
+
+.           { if (comment_level == 0) 
+printf("%d_ILLEGAL_CHARACTER_(%s)\n", line_num, yytext); }
+
+%%
+
+int main() {
+    yylex();
+    return 0;
+}
+
+int yywrap() {
+    return 1;
+}
+
